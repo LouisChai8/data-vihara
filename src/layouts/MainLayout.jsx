@@ -1,7 +1,8 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Activity, Settings,
-  HelpCircle, LogOut, Plus, Bell, HelpingHand
+  HelpCircle, LogOut, Plus, Bell, Search,
+  ChevronRight
 } from 'lucide-react'
 
 const navItems = [
@@ -12,83 +13,148 @@ const navItems = [
 ]
 
 export default function MainLayout() {
+  const location = useLocation()
+  const currentLabel = navItems.find(n => location.pathname.startsWith(n.to))?.label ?? 'Dashboard'
+
   return (
-    <div className="flex h-screen bg-gray-50 font-sans">
+    <div style={{ display: 'flex', height: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", overflow: 'hidden' }}>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+        .nav-link {
+          display: flex; align-items: center; gap: 10px;
+          padding: 9px 12px; border-radius: 8px;
+          font-size: 13.5px; font-weight: 400;
+          color: #6b7280; text-decoration: none;
+          transition: all 0.18s ease;
+          position: relative;
+        }
+        .nav-link:hover { background: #1a1d27; color: #c9cdd8; }
+        .nav-link.active { background: #1e2030; color: #f0c060; font-weight: 500; }
+        .nav-link.active::before {
+          content: '';
+          position: absolute; left: 0; top: 20%; bottom: 20%;
+          width: 3px; border-radius: 0 2px 2px 0;
+          background: #f0c060;
+        }
+        .nav-link svg { flex-shrink: 0; }
+        .add-btn {
+          display: flex; align-items: center; gap: 8px;
+          width: 100%; padding: 9px 14px; border-radius: 8px;
+          background: #f0c060; color: #0f1117;
+          font-size: 13px; font-weight: 600;
+          border: none; cursor: pointer;
+          transition: background 0.18s, transform 0.1s;
+          text-decoration: none;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .add-btn:hover { background: #e6b44a; transform: translateY(-1px); }
+        .add-btn:active { transform: translateY(0); }
+        .top-search {
+          background: #1a1d27; border: 1px solid #23263a;
+          border-radius: 8px; padding: 8px 14px;
+          font-size: 13px; color: #c9cdd8;
+          outline: none; width: 220px;
+          font-family: 'DM Sans', sans-serif;
+          transition: border-color 0.18s;
+        }
+        .top-search::placeholder { color: #454860; }
+        .top-search:focus { border-color: #f0c060; }
+        .notif-btn {
+          background: #1a1d27; border: 1px solid #23263a;
+          border-radius: 8px; padding: 8px; cursor: pointer;
+          color: #6b7280; display: flex; align-items: center;
+          transition: color 0.18s, border-color 0.18s;
+        }
+        .notif-btn:hover { color: #f0c060; border-color: #f0c060; }
+        .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #454860; }
+        .breadcrumb span:last-child { color: #c9cdd8; }
+      `}</style>
 
       {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-100 flex flex-col">
-
-        {/* Logo */}
-        <div className="px-5 py-5 border-b border-gray-100">
-          <p className="font-bold text-gray-900 text-sm">Vihara Ming De</p>
-          <p className="text-xs text-gray-400 mt-0.5">User Management</p>
+      <aside style={{
+        width: '220px', flexShrink: 0,
+        background: '#13151f',
+        borderRight: '1px solid #1e2030',
+        display: 'flex', flexDirection: 'column',
+      }}>
+        <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid #1e2030' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '8px',
+              background: 'linear-gradient(135deg, #f0c060 0%, #d4860a 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '14px', fontWeight: '700', color: '#0f1117'
+            }}></div>
+            <div>
+              <p style={{ fontSize: '13px', fontWeight: '600', color: '#e5e7eb', lineHeight: 1.2 }}>Vihara Ming De</p>
+              <p style={{ fontSize: '10.5px', color: '#454860', marginTop: '1px' }}>Manajemen User</p>
+            </div>
+          </div>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav style={{ flex: 1, padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <p style={{ fontSize: '10px', fontWeight: '600', color: '#353850', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 12px', marginBottom: '6px' }}>Menu</p>
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ` +
-                (isActive
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-gray-600 hover:bg-gray-50')
-              }
+              className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}
             >
-              <Icon size={16} />
+              <Icon size={15} />
               {label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Add User Button */}
-        <div className="px-3 pb-4">
-          <NavLink
-            to="/user/tambah"
-            className="flex items-center gap-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg transition-colors"
-          >
-            <Plus size={16} />
+        <div style={{ padding: '0 10px 16px' }}>
+          <NavLink to="/user/tambah" className="add-btn">
+            <Plus size={14} />
             Tambah User Baru
           </NavLink>
         </div>
 
-        {/* Bottom links */}
-        <div className="px-3 pb-5 space-y-1 border-t border-gray-100 pt-3">
-          <button className="flex items-center gap-3 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 rounded-lg w-full">
-            <HelpCircle size={16} /> Pusat Bantuan
+        <div style={{ borderTop: '1px solid #1e2030', padding: '12px 10px' }}>
+          <button className="nav-link" style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', justifyContent: 'flex-start' }}>
+            <HelpCircle size={15} /> <span style={{ fontSize: '13.5px', color: '#6b7280' }}>Pusat Bantuan</span>
           </button>
-          <button className="flex items-center gap-3 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 rounded-lg w-full">
-            <LogOut size={16} /> Keluar
+          <button className="nav-link" style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', justifyContent: 'flex-start' }}>
+            <LogOut size={15} /> <span style={{ fontSize: '13.5px', color: '#6b7280' }}>Keluar</span>
           </button>
         </div>
       </aside>
 
-      {/* Main area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-
-        {/* Top bar */}
-        <header className="bg-white border-b border-gray-100 px-6 py-3 flex items-center gap-4">
-          <input
-            type="text"
-            placeholder="Cari anggota..."
-            className="flex-1 max-w-xs bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-          />
-          <nav className="flex gap-5 text-sm ml-4">
-            <button className="text-blue-600 font-medium border-b-2 border-blue-600 pb-0.5">User</button>
-            <button className="text-gray-500 hover:text-gray-700">Laporan</button>
-            <button className="text-gray-500 hover:text-gray-700">Log</button>
-          </nav>
-          <div className="ml-auto flex items-center gap-3">
-            <button className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-blue-700">Undang</button>
-            <Bell size={18} className="text-gray-400" />
-            <HelpCircle size={18} className="text-gray-400" />
+      {/* Main */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <header style={{
+          background: '#13151f', borderBottom: '1px solid #1e2030',
+          padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '12px'
+        }}>
+          <div className="breadcrumb">
+            <span>Vihara Ming De</span>
+            <ChevronRight size={12} />
+            <span>{currentLabel}</span>
           </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ position: 'relative' }}>
+            <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#454860' }} />
+            <input className="top-search" style={{ paddingLeft: '32px' }} placeholder="Cari anggota..." />
+          </div>
+          <button className="notif-btn"><Bell size={15} /></button>
+          <button className="notif-btn"><HelpCircle size={15} /></button>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, #f0c060, #d4860a)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '12px', fontWeight: '700', color: '#0f1117', cursor: 'pointer'
+          }}>A</div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
           <Outlet />
         </main>
       </div>
