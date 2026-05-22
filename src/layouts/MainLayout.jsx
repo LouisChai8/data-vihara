@@ -89,7 +89,7 @@ export default function MainLayout() {
               background: 'linear-gradient(135deg, #f0c060 0%, #d4860a 100%)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '14px', fontWeight: '700', color: '#0f1117'
-            }}></div>
+            }}>MD</div>
             <div>
               <p style={{ fontSize: '13px', fontWeight: '600', color: '#e5e7eb', lineHeight: 1.2 }}>Vihara Ming De</p>
               <p style={{ fontSize: '10.5px', color: '#454860', marginTop: '1px' }}>Manajemen User</p>
@@ -151,7 +151,7 @@ export default function MainLayout() {
             background: 'linear-gradient(135deg, #f0c060, #d4860a)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '12px', fontWeight: '700', color: '#0f1117', cursor: 'pointer'
-          }}>A</div>
+          }}>K</div>
         </header>
 
         <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
