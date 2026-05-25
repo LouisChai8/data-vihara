@@ -1,198 +1,276 @@
-import { Users, UserCheck, UserX, TrendingUp, ArrowUpRight, ArrowDownRight, MoreHorizontal } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Users, UserCheck, UserX, MoreHorizontal, ArrowUpRight, Calendar, MapPin } from 'lucide-react'
+import { getAnggota } from '../api/anggota'
 
-const stats = [
-  { label: 'Total Anggota', value: '1,284', change: '+12%', up: true,  icon: Users,      color: '#f0c060', bg: 'rgba(240,192,96,0.08)' },
-  { label: 'Anggota Aktif', value: '947',   change: '+8%',  up: true,  icon: UserCheck,  color: '#4ade80', bg: 'rgba(74,222,128,0.08)' },
-  { label: 'Tidak Aktif',   value: '337',   change: '-3%',  up: false, icon: UserX,      color: '#f87171', bg: 'rgba(248,113,113,0.08)' },
-  { label: 'Pertumbuhan',   value: '23.5%', change: '+4%',  up: true,  icon: TrendingUp, color: '#60a5fa', bg: 'rgba(96,165,250,0.08)' },
-]
-
-const recentUsers = [
-  { name: 'Kimleng',  role: 'Administrator', date: '18 Mei 2025', status: 'Aktif',       avatar: 'KL' },
-  { name: 'Siti Rahayu',   role: 'Manajer',       date: '17 Mei 2025', status: 'Aktif',       avatar: 'SR' },
-  { name: 'Ahmad Fauzi',   role: 'Viewer',        date: '15 Mei 2025', status: 'Tidak Aktif', avatar: 'AF' },
-  { name: 'Dewi Lestari',  role: 'Manajer',       date: '14 Mei 2025', status: 'Aktif',       avatar: 'DL' },
-  { name: 'Rizky Pratama', role: 'Viewer',        date: '12 Mei 2025', status: 'Aktif',       avatar: 'RP' },
-]
-
-const roleColors = {
-  Administrator: { bg: 'rgba(240,192,96,0.12)',  color: '#f0c060' },
-  Manajer:       { bg: 'rgba(96,165,250,0.12)',  color: '#60a5fa' },
-  Viewer:        { bg: 'rgba(156,163,175,0.12)', color: '#9ca3af' },
+function formatDate(dateStr) {
+  if (!dateStr || dateStr === '0000-00-00') return '—'
+  return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-const barData = [42, 68, 55, 80, 63, 91, 74, 88, 57, 76, 95, 83]
-const months  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+function getInisial(nama) {
+  if (!nama) return '?'
+  const parts = nama.trim().split(' ')
+  return parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : parts[0].slice(0, 2).toUpperCase()
+}
+
+const warnaList = ['#c8a96e','#7eb8d4','#8a7ec8','#c87ea0','#7ec8a0','#c8b07e','#d47e7e','#7ec8c8']
+const getWarna = (id) => warnaList[(id - 1) % warnaList.length]
+
+const roleStyle = {
+  Administrator: { bg: 'rgba(200,169,110,0.15)', color: '#c8a96e' },
+  Manajer:       { bg: 'rgba(126,184,212,0.15)', color: '#7eb8d4' },
+  Viewer:        { bg: 'rgba(160,160,170,0.12)', color: '#9ca3af' },
+}
 
 export default function Dashboard() {
-  const maxBar = Math.max(...barData)
+  const [anggotaList, setAnggotaList] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getAnggota()
+      .then(res => setAnggotaList(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const total   = anggotaList.length
+  const aktif   = anggotaList.filter(a => a.status === 'Aktif').length
+  const nonAktif = anggotaList.filter(a => a.status === 'Tidak Aktif').length
+  const recent  = [...anggotaList].slice(0, 5)
+
+  const StatCard = ({ icon: Icon, label, value, color, bg, sub }) => (
+    <div style={{
+      background: '#13151f',
+      border: `1px solid #1e2030`,
+      borderRadius: '18px',
+      padding: '36px 32px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '20px',
+      transition: 'border-color 0.2s, transform 0.2s',
+      cursor: 'default',
+      position: 'relative',
+      overflow: 'hidden',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = '#2e3150'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = '#1e2030'; e.currentTarget.style.transform = 'translateY(0)' }}
+    >
+      {/* Background glow */}
+      <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '140px', height: '140px', borderRadius: '50%', background: color, opacity: 0.04, pointerEvents: 'none' }} />
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ background: bg, borderRadius: '14px', padding: '14px', display: 'flex' }}>
+          <Icon size={26} color={color} strokeWidth={1.8} />
+        </div>
+        <span style={{ fontSize: '12px', color: '#454866' }}>{sub}</span>
+      </div>
+
+      <div>
+        {loading ? (
+          <div style={{ height: '52px', width: '120px', background: '#1e2030', borderRadius: '8px', animation: 'shimmer 1.5s infinite' }} />
+        ) : (
+          <p style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: '52px', fontWeight: '600',
+            color: '#e8eaf5', margin: 0, lineHeight: 1,
+            letterSpacing: '-1px',
+          }}>{value.toLocaleString('id-ID')}</p>
+        )}
+        <p style={{ fontSize: '15px', color: '#6b7191', marginTop: '10px', fontWeight: '400' }}>{label}</p>
+      </div>
+
+      {/* Bottom accent bar */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg, ${color}60, transparent)` }} />
+    </div>
+  )
 
   return (
     <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        .stat-card {
-          background: #13151f;
-          border: 1px solid #1e2030;
-          border-radius: 14px;
-          padding: 22px;
-          transition: border-color 0.2s, transform 0.2s;
-          cursor: default;
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap');
+        * { box-sizing: border-box; }
+        @keyframes shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
         }
-        .stat-card:hover { border-color: #2e3150; transform: translateY(-2px); }
-        .table-row {
-          display: grid;
-          grid-template-columns: 2fr 1fr 1fr 1fr 32px;
-          align-items: center;
-          padding: 13px 18px;
-          border-bottom: 1px solid #1a1d2a;
-          transition: background 0.15s;
+        .skeleton {
+          background: linear-gradient(90deg, #1a1d2e 25%, #20243a 50%, #1a1d2e 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 8px;
         }
-        .table-row:hover { background: #16192a; }
-        .table-row:last-child { border-bottom: none; }
+        .table-row { transition: background 0.15s; }
+        .table-row:hover { background: #16192a !important; }
       `}</style>
 
-      {/* Header */}
-      <div style={{ marginBottom: '28px' }}>
+      {/* Page header */}
+      <div style={{ marginBottom: '36px' }}>
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: '26px', fontWeight: '600',
-          color: '#e5e7eb', marginBottom: '6px'
+          fontSize: '28px', fontWeight: '600',
+          color: '#e5e7eb', margin: '0 0 6px',
         }}>Selamat datang kembali 👋</h1>
-        <p style={{ fontSize: '13.5px', color: '#454860' }}>Berikut ringkasan data anggota Data Vihara hari ini.</p>
+        <p style={{ fontSize: '13.5px', color: '#454860' }}>
+          Berikut ringkasan data umat Vihara Ming De hari ini.
+        </p>
       </div>
 
-      {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-        {stats.map(({ label, value, change, up, icon: Icon, color, bg }) => (
-          <div key={label} className="stat-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <div style={{ background: bg, borderRadius: '10px', padding: '9px', display: 'flex' }}>
-                <Icon size={17} color={color} />
-              </div>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11.5px', fontWeight: '500', color: up ? '#4ade80' : '#f87171' }}>
-                {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                {change}
+      {/* 3 Big stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '32px' }}>
+        <StatCard
+          icon={Users}
+          label="Total Umat"
+          value={total}
+          color="#c8a96e"
+          bg="rgba(200,169,110,0.1)"
+          sub="Semua terdaftar"
+        />
+        <StatCard
+          icon={UserCheck}
+          label="Umat Aktif"
+          value={aktif}
+          color="#4ade80"
+          bg="rgba(74,222,128,0.08)"
+          sub="Status aktif"
+        />
+        <StatCard
+          icon={UserX}
+          label="Umat Tidak Aktif"
+          value={nonAktif}
+          color="#f87171"
+          bg="rgba(248,113,113,0.08)"
+          sub="Status tidak aktif"
+        />
+      </div>
+
+      {/* Active % banner */}
+      {!loading && total > 0 && (
+        <div style={{
+          background: '#13151f',
+          border: '1px solid #1e2030',
+          borderRadius: '14px',
+          padding: '20px 28px',
+          marginBottom: '28px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '13px', color: '#6b7191' }}>Tingkat keaktifan umat</span>
+              <span style={{ fontSize: '13px', fontWeight: '600', color: '#4ade80' }}>
+                {total > 0 ? Math.round((aktif / total) * 100) : 0}% aktif
               </span>
             </div>
-            <p style={{ fontSize: '24px', fontWeight: '600', color: '#e5e7eb', letterSpacing: '-0.5px' }}>{value}</p>
-            <p style={{ fontSize: '12px', color: '#454860', marginTop: '4px' }}>{label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Chart + Donut */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px', marginBottom: '24px' }}>
-
-        {/* Bar Chart */}
-        <div style={{ background: '#13151f', border: '1px solid #1e2030', borderRadius: '14px', padding: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <div>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: '#c9cdd8' }}>Pertumbuhan Anggota</p>
-              <p style={{ fontSize: '11.5px', color: '#454860', marginTop: '2px' }}>Januari — Desember 2024</p>
+            <div style={{ height: '8px', background: '#1e2030', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                width: `${total > 0 ? (aktif / total) * 100 : 0}%`,
+                background: 'linear-gradient(90deg, #4ade80, #22c55e)',
+                borderRadius: '4px',
+                transition: 'width 1s ease',
+              }} />
             </div>
-            <span style={{ fontSize: '11px', color: '#f0c060', background: 'rgba(240,192,96,0.1)', padding: '4px 10px', borderRadius: '20px' }}>+23.5% YTD</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '140px' }}>
-            {barData.map((val, i) => (
-              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{
-                  width: '100%',
-                  height: `${(val / maxBar) * 100}%`,
-                  borderRadius: '5px 5px 3px 3px',
-                  background: i === 10
-                    ? 'linear-gradient(180deg, #f0c060 0%, #d4860a 100%)'
-                    : '#1e2030',
-                  minHeight: '6px',
-                }} />
-                <span style={{ fontSize: '10px', color: '#353850' }}>{months[i]}</span>
-              </div>
-            ))}
+          <div style={{ display: 'flex', gap: '24px', flexShrink: 0 }}>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '20px', fontWeight: '600', color: '#4ade80', margin: 0 }}>{aktif}</p>
+              <p style={{ fontSize: '11px', color: '#454866', marginTop: '2px' }}>Aktif</p>
+            </div>
+            <div style={{ width: '1px', background: '#1e2030' }} />
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '20px', fontWeight: '600', color: '#f87171', margin: 0 }}>{nonAktif}</p>
+              <p style={{ fontSize: '11px', color: '#454866', marginTop: '2px' }}>Tidak Aktif</p>
+            </div>
+            <div style={{ width: '1px', background: '#1e2030' }} />
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: '20px', fontWeight: '600', color: '#c8a96e', margin: 0 }}>{total}</p>
+              <p style={{ fontSize: '11px', color: '#454866', marginTop: '2px' }}>Total</p>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Role Distribution */}
-        <div style={{ background: '#13151f', border: '1px solid #1e2030', borderRadius: '14px', padding: '22px' }}>
-          <p style={{ fontSize: '14px', fontWeight: '600', color: '#c9cdd8', marginBottom: '4px' }}>Distribusi Peran</p>
-          <p style={{ fontSize: '11.5px', color: '#454860', marginBottom: '22px' }}>Berdasarkan role aktif</p>
-          {[
-            { label: 'Viewer',        val: 58, color: '#9ca3af' },
-            { label: 'Manajer',       val: 29, color: '#60a5fa' },
-            { label: 'Administrator', val: 13, color: '#f0c060' },
-          ].map(({ label, val, color }) => (
-            <div key={label} style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '12.5px', color: '#6b7280' }}>{label}</span>
-                <span style={{ fontSize: '12.5px', color: '#c9cdd8', fontWeight: '500' }}>{val}%</span>
-              </div>
-              <div style={{ height: '5px', background: '#1e2030', borderRadius: '3px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${val}%`, background: color, borderRadius: '3px' }} />
-              </div>
-            </div>
-          ))}
-          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
-            <svg width="90" height="90" viewBox="0 0 90 90">
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#1e2030" strokeWidth="12" />
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#f0c060" strokeWidth="12"
-                strokeDasharray={`${2 * Math.PI * 35 * 0.13} ${2 * Math.PI * 35 * 0.87}`}
-                strokeDashoffset={`${2 * Math.PI * 35 * 0.25}`} strokeLinecap="round" />
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#60a5fa" strokeWidth="12"
-                strokeDasharray={`${2 * Math.PI * 35 * 0.29} ${2 * Math.PI * 35 * 0.71}`}
-                strokeDashoffset={`${2 * Math.PI * 35 * (0.25 - 0.13)}`} strokeLinecap="round" />
-              <circle cx="45" cy="45" r="35" fill="none" stroke="#9ca3af" strokeWidth="12"
-                strokeDasharray={`${2 * Math.PI * 35 * 0.58} ${2 * Math.PI * 35 * 0.42}`}
-                strokeDashoffset={`${2 * Math.PI * 35 * (0.25 - 0.13 - 0.29)}`} strokeLinecap="round" />
-              <text x="45" y="49" textAnchor="middle" fontSize="11" fontWeight="600" fill="#e5e7eb" fontFamily="DM Sans">1,284</text>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Users Table */}
-      <div style={{ background: '#13151f', border: '1px solid #1e2030', borderRadius: '14px', overflow: 'hidden' }}>
-        <div style={{ padding: '20px 22px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e2030' }}>
+      {/* Recent members table */}
+      <div style={{ background: '#13151f', border: '1px solid #1e2030', borderRadius: '16px', overflow: 'hidden' }}>
+        <div style={{ padding: '22px 24px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1e2030' }}>
           <div>
-            <p style={{ fontSize: '14px', fontWeight: '600', color: '#c9cdd8' }}>Anggota Terbaru</p>
-            <p style={{ fontSize: '11.5px', color: '#454860', marginTop: '2px' }}>5 pendaftaran terakhir</p>
+            <p style={{ fontSize: '15px', fontWeight: '600', color: '#c9cdd8', margin: 0 }}>Umat Terbaru</p>
+            <p style={{ fontSize: '12px', color: '#454860', marginTop: '3px' }}>5 pendaftaran terakhir</p>
           </div>
-          <button style={{ fontSize: '12px', color: '#f0c060', background: 'rgba(240,192,96,0.08)', border: '1px solid rgba(240,192,96,0.2)', borderRadius: '7px', padding: '6px 14px', cursor: 'pointer', fontFamily: 'DM Sans' }}>
-            Lihat Semua
-          </button>
+          <a href="/user" style={{ fontSize: '12px', color: '#c8a96e', background: 'rgba(200,169,110,0.08)', border: '1px solid rgba(200,169,110,0.2)', borderRadius: '7px', padding: '6px 14px', cursor: 'pointer', textDecoration: 'none' }}>
+            Lihat Semua →
+          </a>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 32px', padding: '10px 18px', borderBottom: '1px solid #1a1d2a' }}>
-          {['Nama', 'Peran', 'Tanggal Daftar', 'Status', ''].map((h, i) => (
+        {/* Table header */}
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 32px', padding: '10px 22px', borderBottom: '1px solid #1a1d2a' }}>
+          {['Nama', 'Peran', 'Chiu Tao', 'Status', ''].map((h, i) => (
             <span key={i} style={{ fontSize: '10.5px', fontWeight: '600', color: '#353850', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</span>
           ))}
         </div>
 
-        {recentUsers.map((u) => (
-          <div key={u.name} className="table-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
-              <div style={{
-                width: '34px', height: '34px', borderRadius: '50%',
-                background: 'linear-gradient(135deg, #1e2030, #2a2d3a)',
-                border: '1px solid #2e3150',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '11px', fontWeight: '600', color: '#f0c060', flexShrink: 0
-              }}>{u.avatar}</div>
-              <p style={{ fontSize: '13px', fontWeight: '500', color: '#c9cdd8' }}>{u.name}</p>
+        {/* Loading skeletons */}
+        {loading && [...Array(5)].map((_, i) => (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 32px', padding: '14px 22px', borderBottom: '1px solid #1a1d2a', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div className="skeleton" style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0 }} />
+              <div className="skeleton" style={{ height: 13, width: '60%' }} />
             </div>
-            <span style={{
-              fontSize: '11.5px', fontWeight: '500',
-              color: roleColors[u.role].color,
-              background: roleColors[u.role].bg,
-              padding: '3px 10px', borderRadius: '20px', display: 'inline-block'
-            }}>{u.role}</span>
-            <span style={{ fontSize: '12.5px', color: '#454860' }}>{u.date}</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: u.status === 'Aktif' ? '#4ade80' : '#f87171' }} />
-              <span style={{ fontSize: '12.5px', color: u.status === 'Aktif' ? '#4ade80' : '#f87171' }}>{u.status}</span>
-            </div>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#353850', padding: '4px', borderRadius: '5px', display: 'flex' }}>
-              <MoreHorizontal size={15} />
-            </button>
+            <div className="skeleton" style={{ height: 13, width: '70%' }} />
+            <div className="skeleton" style={{ height: 13, width: '80%' }} />
+            <div className="skeleton" style={{ height: 13, width: '50%' }} />
           </div>
         ))}
+
+        {/* Empty */}
+        {!loading && recent.length === 0 && (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#353858' }}>
+            <Users size={28} style={{ opacity: 0.3, marginBottom: '8px' }} />
+            <p style={{ fontSize: '13px' }}>Belum ada umat terdaftar.</p>
+          </div>
+        )}
+
+        {/* Rows */}
+        {!loading && recent.map((u) => {
+          const rs = roleStyle[u.peran] || roleStyle.Viewer
+          const warna = getWarna(u.id)
+          return (
+            <div
+              key={u.id}
+              className="table-row"
+              style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 32px', padding: '13px 22px', borderBottom: '1px solid #1a1d2a', alignItems: 'center' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '11px' }}>
+                <div style={{
+                  width: '34px', height: '34px', borderRadius: '50%',
+                  background: `${warna}18`, border: `1.5px solid ${warna}40`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '11px', fontWeight: '600', color: warna, flexShrink: 0
+                }}>{getInisial(u.nama_lengkap)}</div>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: '500', color: '#c9cdd8', margin: 0 }}>{u.nama_lengkap}</p>
+                  {u.nama_baptis && <p style={{ fontSize: '11px', color: '#454866', margin: '1px 0 0', fontStyle: 'italic' }}>{u.nama_baptis}</p>}
+                </div>
+              </div>
+
+              <span style={{ fontSize: '11.5px', fontWeight: '500', color: rs.color, background: rs.bg, padding: '3px 10px', borderRadius: '20px', display: 'inline-block' }}>{u.peran}</span>
+
+              <span style={{ fontSize: '12.5px', color: '#454860' }}>{formatDate(u.chiu_tao_sejak)}</span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: u.status === 'Aktif' ? '#4ade80' : '#f87171' }} />
+                <span style={{ fontSize: '12.5px', color: u.status === 'Aktif' ? '#4ade80' : '#f87171' }}>{u.status}</span>
+              </div>
+
+              <div style={{ color: '#353850', display: 'flex' }}>
+                <MoreHorizontal size={15} />
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
