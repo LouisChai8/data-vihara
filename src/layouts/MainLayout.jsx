@@ -115,13 +115,6 @@ export default function MainLayout() {
             </NavLink>
           ))}
         </nav>
-
-        {/* Add User Button */}
-        <div style={{ padding: '0 10px 24px' }}>
-          <NavLink to="/user" className="add-btn">
-            + Tambah User Baru
-          </NavLink>
-        </div>
       </aside>
 
       {/* ── Main ── */}

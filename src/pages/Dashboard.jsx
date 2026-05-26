@@ -19,9 +19,11 @@ const warnaList = ['#c8a96e','#7eb8d4','#8a7ec8','#c87ea0','#7ec8a0','#c8b07e','
 const getWarna = (id) => warnaList[(id - 1) % warnaList.length]
 
 const roleStyle = {
-  Administrator: { bg: 'rgba(200,169,110,0.15)', color: '#c8a96e' },
-  Manajer:       { bg: 'rgba(126,184,212,0.15)', color: '#7eb8d4' },
-  Viewer:        { bg: 'rgba(160,160,170,0.12)', color: '#9ca3af' },
+  Administrator:      { bg: 'rgba(200,169,110,0.15)', color: '#c8a96e' },
+  'Chiang Se':        { bg: 'rgba(126,184,212,0.15)', color: '#7eb8d4' },
+  'Tan Chu':          { bg: 'rgba(138,126,200,0.15)', color: '#8a7ec8' },
+  'Ciang Yen':        { bg: 'rgba(200,126,160,0.15)', color: '#c87ea0' },
+  'Pan Shi Ren Yuan': { bg: 'rgba(126,200,160,0.15)', color: '#7ec8a0' },
 }
 
 export default function Dashboard() {
