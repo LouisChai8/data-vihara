@@ -1,15 +1,9 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import {
-  LayoutDashboard, Users, Activity, Settings,
-  HelpCircle, LogOut, Plus, Bell, Search,
-  ChevronRight
-} from 'lucide-react'
+import { LayoutDashboard, Users, Search, ChevronRight } from 'lucide-react'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/user',      icon: Users,           label: 'User' },
-  { to: '/aktivitas', icon: Activity,        label: 'Aktivitas' },
-  { to: '/pengaturan',icon: Settings,        label: 'Pengaturan' },
 ]
 
 export default function MainLayout() {
@@ -25,6 +19,7 @@ export default function MainLayout() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 2px; }
+
         .nav-link {
           display: flex; align-items: center; gap: 10px;
           padding: 9px 12px; border-radius: 8px;
@@ -34,7 +29,9 @@ export default function MainLayout() {
           position: relative;
         }
         .nav-link:hover { background: #1a1d27; color: #c9cdd8; }
-        .nav-link.active { background: #1e2030; color: #f0c060; font-weight: 500; }
+        .nav-link.active {
+          background: #1e2030; color: #f0c060; font-weight: 500;
+        }
         .nav-link.active::before {
           content: '';
           position: absolute; left: 0; top: 20%; bottom: 20%;
@@ -42,6 +39,7 @@ export default function MainLayout() {
           background: #f0c060;
         }
         .nav-link svg { flex-shrink: 0; }
+
         .add-btn {
           display: flex; align-items: center; gap: 8px;
           width: 100%; padding: 9px 14px; border-radius: 8px;
@@ -54,6 +52,7 @@ export default function MainLayout() {
         }
         .add-btn:hover { background: #e6b44a; transform: translateY(-1px); }
         .add-btn:active { transform: translateY(0); }
+
         .top-search {
           background: #1a1d27; border: 1px solid #23263a;
           border-radius: 8px; padding: 8px 14px;
@@ -64,32 +63,37 @@ export default function MainLayout() {
         }
         .top-search::placeholder { color: #454860; }
         .top-search:focus { border-color: #f0c060; }
-        .notif-btn {
+
+        .icon-btn {
           background: #1a1d27; border: 1px solid #23263a;
           border-radius: 8px; padding: 8px; cursor: pointer;
           color: #6b7280; display: flex; align-items: center;
           transition: color 0.18s, border-color 0.18s;
         }
-        .notif-btn:hover { color: #f0c060; border-color: #f0c060; }
+        .icon-btn:hover { color: #f0c060; border-color: #f0c060; }
+
         .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #454860; }
         .breadcrumb span:last-child { color: #c9cdd8; }
       `}</style>
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside style={{
         width: '220px', flexShrink: 0,
         background: '#13151f',
         borderRight: '1px solid #1e2030',
         display: 'flex', flexDirection: 'column',
       }}>
+
+        {/* Logo */}
         <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid #1e2030' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '32px', height: '32px', borderRadius: '8px',
               background: 'linear-gradient(135deg, #f0c060 0%, #d4860a 100%)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '14px', fontWeight: '700', color: '#0f1117'
-            }}>MD</div>
+              fontSize: '14px', fontWeight: '700', color: '#0f1117',
+              flexShrink: 0,
+            }}>M</div>
             <div>
               <p style={{ fontSize: '13px', fontWeight: '600', color: '#e5e7eb', lineHeight: 1.2 }}>Vihara Ming De</p>
               <p style={{ fontSize: '10.5px', color: '#454860', marginTop: '1px' }}>Manajemen User</p>
@@ -97,6 +101,7 @@ export default function MainLayout() {
           </div>
         </div>
 
+        {/* Nav */}
         <nav style={{ flex: 1, padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <p style={{ fontSize: '10px', fontWeight: '600', color: '#353850', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 12px', marginBottom: '6px' }}>Menu</p>
           {navItems.map(({ to, icon: Icon, label }) => (
@@ -111,25 +116,18 @@ export default function MainLayout() {
           ))}
         </nav>
 
-        <div style={{ padding: '0 10px 16px' }}>
-          <NavLink to="/user/tambah" className="add-btn">
-            <Plus size={14} />
-            Tambah User Baru
+        {/* Add User Button */}
+        <div style={{ padding: '0 10px 24px' }}>
+          <NavLink to="/user" className="add-btn">
+            + Tambah User Baru
           </NavLink>
-        </div>
-
-        <div style={{ borderTop: '1px solid #1e2030', padding: '12px 10px' }}>
-          <button className="nav-link" style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', justifyContent: 'flex-start' }}>
-            <HelpCircle size={15} /> <span style={{ fontSize: '13.5px', color: '#6b7280' }}>Pusat Bantuan</span>
-          </button>
-          <button className="nav-link" style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', justifyContent: 'flex-start' }}>
-            <LogOut size={15} /> <span style={{ fontSize: '13.5px', color: '#6b7280' }}>Keluar</span>
-          </button>
         </div>
       </aside>
 
-      {/* Main */}
+      {/* ── Main ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* Topbar */}
         <header style={{
           background: '#13151f', borderBottom: '1px solid #1e2030',
           padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '12px'
@@ -139,21 +137,26 @@ export default function MainLayout() {
             <ChevronRight size={12} />
             <span>{currentLabel}</span>
           </div>
+
           <div style={{ flex: 1 }} />
+
+          {/* Search */}
           <div style={{ position: 'relative' }}>
             <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#454860' }} />
             <input className="top-search" style={{ paddingLeft: '32px' }} placeholder="Cari anggota..." />
           </div>
-          <button className="notif-btn"><Bell size={15} /></button>
-          <button className="notif-btn"><HelpCircle size={15} /></button>
+
+          {/* Avatar */}
           <div style={{
             width: '32px', height: '32px', borderRadius: '50%',
             background: 'linear-gradient(135deg, #f0c060, #d4860a)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '12px', fontWeight: '700', color: '#0f1117', cursor: 'pointer'
+            fontSize: '12px', fontWeight: '700', color: '#0f1117', cursor: 'pointer',
+            flexShrink: 0,
           }}>K</div>
         </header>
 
+        {/* Page content */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
           <Outlet />
         </main>
