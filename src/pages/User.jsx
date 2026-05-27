@@ -713,12 +713,12 @@ export default function UserPage() {
                 margin: 0,
               }}
             >
-              Daftar Anggota
+              Daftar Umat
             </h1>
             <p style={{ fontSize: "13px", color: "#454866", marginTop: "5px" }}>
               {loading
                 ? "Memuat data..."
-                : `${filtered.length} anggota ditemukan`}
+                : `${filtered.length}  ditemukan`}
             </p>
           </div>
           <button
@@ -738,7 +738,7 @@ export default function UserPage() {
               boxShadow: "0 4px 20px rgba(200,169,110,0.25)",
             }}
           >
-            <Plus size={15} /> Tambah Anggota
+            <Plus size={15} /> Tambah Umat
           </button>
         </div>
 
@@ -895,8 +895,8 @@ export default function UserPage() {
             <Users size={36} style={{ marginBottom: "12px", opacity: 0.4 }} />
             <p style={{ fontSize: "14px" }}>
               {anggotaList.length === 0
-                ? 'Belum ada anggota. Klik "Tambah Anggota" untuk mulai.'
-                : "Tidak ada anggota yang sesuai filter."}
+                ? 'Belum ada umat. Klik "Tambah Umat" untuk mulai.'
+                : "Tidak ada umat yang sesuai filter."}
             </p>
           </div>
         )}

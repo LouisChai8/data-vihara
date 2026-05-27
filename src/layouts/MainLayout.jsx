@@ -133,12 +133,6 @@ export default function MainLayout() {
 
           <div style={{ flex: 1 }} />
 
-          {/* Search */}
-          <div style={{ position: 'relative' }}>
-            <Search size={13} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#454860' }} />
-            <input className="top-search" style={{ paddingLeft: '32px' }} placeholder="Cari anggota..." />
-          </div>
-
           {/* Avatar */}
           <div style={{
             width: '32px', height: '32px', borderRadius: '50%',
