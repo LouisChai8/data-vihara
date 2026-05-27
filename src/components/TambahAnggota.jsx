@@ -166,7 +166,14 @@ function SelectField({
   );
 }
 
-function TextAreaField({ label, field, placeholder = "", form, onChange }) {
+function TextAreaField({
+  label,
+  field,
+  placeholder = "",
+  form,
+  errors,
+  onChange,
+}) {
   return (
     <div>
       <label style={labelStyle}>{label}</label>
@@ -175,10 +182,25 @@ function TextAreaField({ label, field, placeholder = "", form, onChange }) {
         placeholder={placeholder}
         rows={3}
         onChange={(e) => onChange(field, e.target.value)}
-        style={{ ...getInputStyle(false), resize: "vertical", lineHeight: 1.6 }}
-        onFocus={(e) => (e.target.style.borderColor = "rgba(200,169,110,0.6)")}
-        onBlur={(e) => (e.target.style.borderColor = "#1e2235")}
+        style={{
+          ...getInputStyle(!!errors[field]),
+          resize: "vertical",
+          lineHeight: 1.6,
+        }}
+        onFocus={(e) =>
+          (e.target.style.borderColor = errors[field]
+            ? "#c87e7e"
+            : "rgba(200,169,110,0.6)")
+        }
+        onBlur={(e) =>
+          (e.target.style.borderColor = errors[field] ? "#c87e7e" : "#1e2235")
+        }
       />
+      {errors[field] && (
+        <p style={{ fontSize: "11px", color: "#c87e7e", marginTop: "4px" }}>
+          {errors[field]}
+        </p>
+      )}
     </div>
   );
 }
@@ -195,33 +217,62 @@ export default function TambahAnggota({ onClose, onSuccess }) {
     setErrors((e) => ({ ...e, [field]: "" }));
   };
 
+  // ── Per-step validation ───────────────────────────────────────────────────
+  const validateStep = (currentStep) => {
+    const e = {};
+
+    if (currentStep === 1) {
+      if (!form.nama_lengkap.trim())
+        e.nama_lengkap = "Nama lengkap wajib diisi";
+      if (!form.nama_baptis.trim()) e.nama_baptis = "Nama baptis wajib diisi";
+      if (!form.jenis_kelamin) e.jenis_kelamin = "Pilih jenis kelamin";
+      if (!form.tanggal_lahir) e.tanggal_lahir = "Tanggal lahir wajib diisi";
+      if (!form.alamat.trim()) e.alamat = "Alamat wajib diisi";
+    }
+
+    if (currentStep === 2) {
+      if (!form.chiu_tao_sejak) e.chiu_tao_sejak = "Chiu Tao Sejak wajib diisi";
+      if (!form.guru_pengajak.trim())
+        e.guru_pengajak = "Guru pengajak wajib diisi";
+      if (!form.guru_penanggung.trim())
+        e.guru_penanggung = "Guru penanggung wajib diisi";
+      if (!form.pandita.trim()) e.pandita = "Pandita wajib diisi";
+    }
+
+    if (currentStep === 3) {
+      if (!form.no_telepon.trim()) e.no_telepon = "Nomor telepon wajib diisi";
+      else if (!/^[0-9+\-\s]{8,15}$/.test(form.no_telepon))
+        e.no_telepon = "Format nomor telepon tidak valid";
+      if (!form.email.trim()) e.email = "Email wajib diisi";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+        e.email = "Format email tidak valid";
+    }
+
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  // ── Full validation on submit ─────────────────────────────────────────────
   const validate = () => {
     const e = {};
 
-    // Step 1 — Pribadi
     if (!form.nama_lengkap.trim()) e.nama_lengkap = "Nama lengkap wajib diisi";
     if (!form.nama_baptis.trim()) e.nama_baptis = "Nama baptis wajib diisi";
     if (!form.jenis_kelamin) e.jenis_kelamin = "Pilih jenis kelamin";
     if (!form.tanggal_lahir) e.tanggal_lahir = "Tanggal lahir wajib diisi";
     if (!form.alamat.trim()) e.alamat = "Alamat wajib diisi";
-
-    // Step 2 — Keagamaan
     if (!form.chiu_tao_sejak) e.chiu_tao_sejak = "Chiu Tao Sejak wajib diisi";
     if (!form.guru_pengajak.trim())
       e.guru_pengajak = "Guru pengajak wajib diisi";
     if (!form.guru_penanggung.trim())
       e.guru_penanggung = "Guru penanggung wajib diisi";
     if (!form.pandita.trim()) e.pandita = "Pandita wajib diisi";
-
-    // Step 3 — Kontak
     if (!form.no_telepon.trim()) e.no_telepon = "Nomor telepon wajib diisi";
+    else if (!/^[0-9+\-\s]{8,15}$/.test(form.no_telepon))
+      e.no_telepon = "Format nomor telepon tidak valid";
     if (!form.email.trim()) e.email = "Email wajib diisi";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       e.email = "Format email tidak valid";
-    if (form.no_telepon && !/^[0-9+\-\s]{8,15}$/.test(form.no_telepon))
-      e.no_telepon = "Format nomor telepon tidak valid";
-
-    // Step 4 — Akses
     if (!form.peran) e.peran = "Pilih peran terlebih dahulu";
     if (!form.status) e.status = "Pilih status terlebih dahulu";
 
@@ -229,6 +280,7 @@ export default function TambahAnggota({ onClose, onSuccess }) {
     return Object.keys(e).length === 0;
   };
 
+  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async () => {
     const valid = validate();
     if (!valid) {
@@ -244,23 +296,23 @@ export default function TambahAnggota({ onClose, onSuccess }) {
         3: ["no_telepon", "email"],
         4: ["peran", "status"],
       };
-      const currentErrors = {};
-      if (!form.nama_lengkap.trim()) currentErrors.nama_lengkap = true;
-      if (!form.nama_baptis.trim()) currentErrors.nama_baptis = true;
-      if (!form.jenis_kelamin) currentErrors.jenis_kelamin = true;
-      if (!form.tanggal_lahir) currentErrors.tanggal_lahir = true;
-      if (!form.alamat.trim()) currentErrors.alamat = true;
-      if (!form.chiu_tao_sejak) currentErrors.chiu_tao_sejak = true;
-      if (!form.guru_pengajak.trim()) currentErrors.guru_pengajak = true;
-      if (!form.guru_penanggung.trim()) currentErrors.guru_penanggung = true;
-      if (!form.pandita.trim()) currentErrors.pandita = true;
-      if (!form.no_telepon.trim()) currentErrors.no_telepon = true;
-      if (!form.email.trim()) currentErrors.email = true;
-      if (!form.peran) currentErrors.peran = true;
-      if (!form.status) currentErrors.status = true;
-
+      const hasError = {
+        nama_lengkap: !form.nama_lengkap.trim(),
+        nama_baptis: !form.nama_baptis.trim(),
+        jenis_kelamin: !form.jenis_kelamin,
+        tanggal_lahir: !form.tanggal_lahir,
+        alamat: !form.alamat.trim(),
+        chiu_tao_sejak: !form.chiu_tao_sejak,
+        guru_pengajak: !form.guru_pengajak.trim(),
+        guru_penanggung: !form.guru_penanggung.trim(),
+        pandita: !form.pandita.trim(),
+        no_telepon: !form.no_telepon.trim(),
+        email: !form.email.trim(),
+        peran: !form.peran,
+        status: !form.status,
+      };
       for (let s = 1; s <= 4; s++) {
-        if (stepFields[s].some((f) => currentErrors[f])) {
+        if (stepFields[s].some((f) => hasError[f])) {
           setStep(s);
           break;
         }
@@ -292,6 +344,7 @@ export default function TambahAnggota({ onClose, onSuccess }) {
 
   const sharedProps = { form, errors, onChange: handleChange };
 
+  // ── Step content ──────────────────────────────────────────────────────────
   const stepContent = {
     1: (
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -311,27 +364,29 @@ export default function TambahAnggota({ onClose, onSuccess }) {
             />
           </div>
           <Field
-            label="Nama Baptis"
+            label="Nama Baptis *"
             field="nama_baptis"
             placeholder="Nama baptis"
             {...sharedProps}
           />
           <SelectField
-            label="Jenis Kelamin"
+            label="Jenis Kelamin *"
             field="jenis_kelamin"
             options={["Laki-laki", "Perempuan"]}
             placeholder="Pilih jenis kelamin..."
             {...sharedProps}
           />
-          <Field
-            label="Tanggal Lahir"
-            field="tanggal_lahir"
-            type="date"
-            {...sharedProps}
-          />
+          <div style={{ gridColumn: "1 / -1" }}>
+            <Field
+              label="Tanggal Lahir *"
+              field="tanggal_lahir"
+              type="date"
+              {...sharedProps}
+            />
+          </div>
         </div>
         <TextAreaField
-          label="Alamat Lengkap"
+          label="Alamat Lengkap *"
           field="alamat"
           placeholder="Masukkan alamat lengkap..."
           {...sharedProps}
@@ -349,27 +404,27 @@ export default function TambahAnggota({ onClose, onSuccess }) {
         >
           <div style={{ gridColumn: "1 / -1" }}>
             <Field
-              label="Chiu Tao Sejak"
+              label="Chiu Tao Sejak *"
               field="chiu_tao_sejak"
               type="date"
               {...sharedProps}
             />
           </div>
           <Field
-            label="Guru Pengajak"
+            label="Guru Pengajak *"
             field="guru_pengajak"
             placeholder="Nama guru pengajak"
             {...sharedProps}
           />
           <Field
-            label="Guru Penanggung"
+            label="Guru Penanggung *"
             field="guru_penanggung"
             placeholder="Nama guru penanggung"
             {...sharedProps}
           />
           <div style={{ gridColumn: "1 / -1" }}>
             <Field
-              label="Pandita"
+              label="Pandita *"
               field="pandita"
               placeholder="Nama pandita"
               {...sharedProps}
@@ -381,14 +436,14 @@ export default function TambahAnggota({ onClose, onSuccess }) {
     3: (
       <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         <Field
-          label="Nomor Telepon"
+          label="Nomor Telepon *"
           field="no_telepon"
           placeholder="08xx-xxxx-xxxx"
           type="tel"
           {...sharedProps}
         />
         <Field
-          label="Email"
+          label="Email *"
           field="email"
           placeholder="email@contoh.com"
           type="email"
@@ -453,7 +508,11 @@ export default function TambahAnggota({ onClose, onSuccess }) {
             ["Jenis Kelamin", form.jenis_kelamin || "—"],
             ["Tanggal Lahir", form.tanggal_lahir || "—"],
             ["Chiu Tao", form.chiu_tao_sejak || "—"],
+            ["Guru Pengajak", form.guru_pengajak || "—"],
+            ["Guru Penanggung", form.guru_penanggung || "—"],
             ["Pandita", form.pandita || "—"],
+            ["No. Telepon", form.no_telepon || "—"],
+            ["Email", form.email || "—"],
             ["Peran", form.peran || "—"],
             ["Status", form.status || "—"],
           ].map(([k, v]) => (
@@ -604,7 +663,9 @@ export default function TambahAnggota({ onClose, onSuccess }) {
                 return (
                   <button
                     key={s.id}
-                    onClick={() => setStep(s.id)}
+                    onClick={() => {
+                      if (s.id < step) setStep(s.id);
+                    }}
                     style={{
                       flex: 1,
                       display: "flex",
@@ -615,7 +676,7 @@ export default function TambahAnggota({ onClose, onSuccess }) {
                       background: "none",
                       border: "none",
                       borderBottom: `2px solid ${active ? "#c8a96e" : "transparent"}`,
-                      cursor: "pointer",
+                      cursor: s.id < step ? "pointer" : "default",
                       transition: "all 0.18s",
                     }}
                   >
@@ -711,7 +772,7 @@ export default function TambahAnggota({ onClose, onSuccess }) {
               {step === 1 ? "Batal" : "← Kembali"}
             </button>
 
-            {/* Dots */}
+            {/* Progress dots */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               {steps.map((s) => (
                 <div
@@ -734,7 +795,9 @@ export default function TambahAnggota({ onClose, onSuccess }) {
 
             {step < 4 ? (
               <button
-                onClick={() => setStep((s) => s + 1)}
+                onClick={() => {
+                  if (validateStep(step)) setStep((s) => s + 1);
+                }}
                 style={{
                   padding: "10px 22px",
                   borderRadius: "10px",
