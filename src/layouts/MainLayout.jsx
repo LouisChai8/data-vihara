@@ -1,18 +1,27 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Search, ChevronRight } from 'lucide-react'
+import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { LayoutDashboard, Users, Search, ChevronRight } from "lucide-react";
 
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/user',      icon: Users,           label: 'User' },
-]
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/user", icon: Users, label: "User" },
+];
 
-export default function MainLayout() {
-  const location = useLocation()
-  const currentLabel = navItems.find(n => location.pathname.startsWith(n.to))?.label ?? 'Dashboard'
+export default function MainLayout({ user, onLogout }) {
+  const location = useLocation();
+  const currentLabel =
+    navItems.find((n) => location.pathname.startsWith(n.to))?.label ??
+    "Dashboard";
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#0f1117', fontFamily: "'DM Sans', sans-serif", overflow: 'hidden' }}>
-
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        background: "#0f1117",
+        fontFamily: "'DM Sans', sans-serif",
+        overflow: "hidden",
+      }}
+    >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,38 +86,95 @@ export default function MainLayout() {
       `}</style>
 
       {/* ── Sidebar ── */}
-      <aside style={{
-        width: '220px', flexShrink: 0,
-        background: '#13151f',
-        borderRight: '1px solid #1e2030',
-        display: 'flex', flexDirection: 'column',
-      }}>
-
+      <aside
+        style={{
+          width: "220px",
+          flexShrink: 0,
+          background: "#13151f",
+          borderRight: "1px solid #1e2030",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Logo */}
-        <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid #1e2030' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, #f0c060 0%, #d4860a 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '14px', fontWeight: '700', color: '#0f1117',
-              flexShrink: 0,
-            }}>M</div>
+        <div
+          style={{
+            padding: "24px 20px 20px",
+            borderBottom: "1px solid #1e2030",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                background: "linear-gradient(135deg, #f0c060 0%, #d4860a 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "14px",
+                fontWeight: "700",
+                color: "#0f1117",
+                flexShrink: 0,
+              }}
+            >
+              M
+            </div>
             <div>
-              <p style={{ fontSize: '13px', fontWeight: '600', color: '#e5e7eb', lineHeight: 1.2 }}>Vihara Ming De</p>
-              <p style={{ fontSize: '10.5px', color: '#454860', marginTop: '1px' }}>Manajemen User</p>
+              <p
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#e5e7eb",
+                  lineHeight: 1.2,
+                }}
+              >
+                Vihara Ming De
+              </p>
+              <p
+                style={{
+                  fontSize: "10.5px",
+                  color: "#454860",
+                  marginTop: "1px",
+                }}
+              >
+                Manajemen User
+              </p>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '16px 10px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <p style={{ fontSize: '10px', fontWeight: '600', color: '#353850', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 12px', marginBottom: '6px' }}>Menu</p>
+        <nav
+          style={{
+            flex: 1,
+            padding: "16px 10px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "10px",
+              fontWeight: "600",
+              color: "#353850",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              padding: "0 12px",
+              marginBottom: "6px",
+            }}
+          >
+            Menu
+          </p>
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}
+              className={({ isActive }) =>
+                "nav-link" + (isActive ? " active" : "")
+              }
             >
               <Icon size={15} />
               {label}
@@ -118,13 +184,25 @@ export default function MainLayout() {
       </aside>
 
       {/* ── Main ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         {/* Topbar */}
-        <header style={{
-          background: '#13151f', borderBottom: '1px solid #1e2030',
-          padding: '12px 28px', display: 'flex', alignItems: 'center', gap: '12px'
-        }}>
+        <header
+          style={{
+            background: "#13151f",
+            borderBottom: "1px solid #1e2030",
+            padding: "12px 28px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
           <div className="breadcrumb">
             <span>Vihara Ming De</span>
             <ChevronRight size={12} />
@@ -134,20 +212,53 @@ export default function MainLayout() {
           <div style={{ flex: 1 }} />
 
           {/* Avatar */}
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #f0c060, #d4860a)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '12px', fontWeight: '700', color: '#0f1117', cursor: 'pointer',
-            flexShrink: 0,
-          }}>K</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ textAlign: "right" }}>
+              <p
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  color: "#c9cdd8",
+                  margin: 0,
+                }}
+              >
+                {user?.name}
+              </p>
+              <p style={{ fontSize: "10px", color: "#454860", margin: 0 }}>
+                {user?.email}
+              </p>
+            </div>
+            <div
+              onClick={onLogout}
+              title="Keluar"
+              style={{
+                width: "34px",
+                height: "34px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #c8a96e, #d4860a)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "12px",
+                fontWeight: "700",
+                color: "#0f1117",
+                cursor: "pointer",
+                flexShrink: 0,
+                transition: "opacity 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              {user?.name?.charAt(0)?.toUpperCase() || "U"}
+            </div>
+          </div>
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+        <main style={{ flex: 1, overflowY: "auto", padding: "28px" }}>
           <Outlet />
         </main>
       </div>
     </div>
-  )
+  );
 }
